@@ -1,0 +1,70 @@
+Input language
+
+The BNF grammar for the input language is:
+
+<program> ::= <body>
+
+<body> ::= <def>*  <exp>* 
+
+<def> ::= (define (<var> <var>*) <body>)
+       |  (define <var> <exp>)
+
+<exp> ::= <literal>
+       |  <variable>
+       |  (if <exp> <exp> <exp>)
+       |  (if <exp> <exp>)
+       |  (and <exp>*)
+       |  (or <exp>*)
+       |  (cond <cond-clause>*)
+       |  (set! <var> <exp>)
+       |  (lambda (<var>*) <body>)
+       |  (let <bindings> <body>)
+       |  (letrec <bindings> <body>)
+       |  (begin <body>)
+       |  (<operator> <operand>*)
+
+<literal> ::= (quote <symbol>) | '<symbol>
+           |  <integer>
+           |  <boolean>
+           |  <string>
+           |  <var>
+
+<cond-clause> ::= (<exp> <exp>+)
+               |  (<exp>)
+               |  (<exp> => <exp>)
+               |  (else <exp>)
+
+<bindings> ::= ((<var> <exp>)*)
+
+<operator> ::= <exp>
+
+<operand> ::= <exp>
+You should support the following primitives:
+
+ display newline + * - / = < call/cc
+You do not have to support multi-precision arithmetic. 32-bit or 64-bit integers are OK.
+
+Desugared language
+
+It is recommended that you desugar into this language:
+
+ 
+ <exp> ::= <literal>
+        |  <variable>
+        |  (if <exp> <exp> <exp>)
+        |  (set! <var> <exp>)
+        |  (lambda (<var>*) <body>)
+        |  (begin <body>)
+        |  (<exp> <exp>*)
+CPS language
+
+The final CPS language should be:
+
+ 
+ <exp> ::= <literal>
+        |  <variable>
+        |  (lambda <formals> <call>)
+
+ <call> ::= (if <exp> <call> <call>)
+         |  (begin (set! <var> <exp>) <call>)
+         |  (<exp> <exp>*)

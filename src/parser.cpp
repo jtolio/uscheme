@@ -1,53 +1,78 @@
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 
-#include <iostream>
-#include <string>
-#include <complex>
-
+#include "common.h"
 #include "ast.h"
 
-namespace picturesque {
+namespace uscheme {
 namespace parser {
 
   namespace qi = boost::spirit::qi;
-  void print(int const& i) {
-    std::cout << i << std::endl;
-  }
+  namespace ascii = boost::spirit::ascii;
+  namespace phx = boost::phoenix;
+  using namespace uscheme::ast;
   
   template <typename Iterator>
-  bool parse_program(Iterator first, Iterator last, std::complex<double>& c) {
-    using qi::double_;
-    using qi::_1;
-    using qi::phrase_parse;
-    using boost::spirit::ascii::space;
-    using boost::phoenix::ref;
+  struct grammar : qi::grammar<Iterator, Integer, ascii::space_type>{
+    qi::rule<Iterator, Body, ascii::space_type> body;
+    qi::rule<Iterator, Binding, ascii::space_type> definition;
+    qi::rule<Iterator, PTR<Expression>, ascii::space_type> expression;
+    qi::rule<Iterator, Integer, ascii::space_type> integer;
+    qi::rule<Iterator, Boolean, ascii::space_type> boolean;
+    qi::rule<Iterator, String, ascii::space_type> string;
+    qi::rule<Iterator, Variable, ascii::space_type> variable;
+    qi::rule<Iterator, Conditional, ascii::space_type> conditional;
+    qi::rule<Iterator, Conjunction, ascii::space_type> conjunction;
+    qi::rule<Iterator, Disjunction, ascii::space_type> disjunction;
+    qi::rule<Iterator, Mutation, ascii::space_type> mutation;
+    qi::rule<Iterator, Lambda, ascii::space_type> lambda;
+    qi::rule<Iterator, Body, ascii::space_type> begin;
+    qi::rule<Iterator, Application, ascii::space_type> application;
+
+    grammar() : grammar::base_type(integer) {
+      integer = qi::long_long[phx::at_c<0>(qi::_val) = qi::_1];
+    }
+  };
+  
+/*
+    body = def* exp*
     
-    double rN = 0.0;
-    double iN = 0.0;
-    bool r = phrase_parse(first, last, (
-      '(' >> double_[ref(rN) = _1]
-          >> -(',' >> double_[ref(iN) = _1]) >> ')'
-      | double_[ref(rN) = _1] ), space) && first == last;
-    if(r) c = std::complex<double>(rN, iN);
-    return r;
-  }
+    def = (define var exp)
+    
+    exp = integer
+        | boolean
+        | string
+        | var
+        | (if exp exp exp)
+        | (and exp*)
+        | (or exp*)
+        | (set! var exp)
+        | (lambda (var*) body)
+        | (begin body)
+        | (exp exp*)
+*/
 
 }}
 
 int main(int argc, char** argv) {
-  using namespace picturesque;
+  std::cout << "started" << std::endl;
+
+  using namespace uscheme;
   std::string str;
+  std::ostringstream os;
   while(getline(std::cin, str)) {
-    if(str.empty() || str[0] == 'q' || str[0] == 'Q') break;
-    std::complex<double> c;
-    if(parser::parse_complex(str.begin(), str.end(), c)) {
-      std::cout << "got: " << c << std::endl;
-    } else {
-      std::cout << "failed" << std::endl;
-    }
+    if(str.empty()) break;
+    os << str;
   }  
-  std::cout << "bye" << std::endl;
+  str = os.str();
+  
+  uscheme::parser::grammar<std::string::const_iterator> g;
+  uscheme::ast::Integer b;
+  std::string::const_iterator iter = str.begin();
+  std::string::const_iterator end = str.end();
+  bool r = boost::spirit::qi::phrase_parse(iter, end, g,
+      boost::spirit::ascii::space, b);
+  if(r && iter == str.end()) { std::cout << "yay " << b.value << std::endl; }
+  // do stuff
   return 0;
 }
