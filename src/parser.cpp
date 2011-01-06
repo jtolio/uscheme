@@ -13,24 +13,24 @@ namespace parser {
   using namespace uscheme::ast;
   
   template <typename Iterator>
-  struct grammar : qi::grammar<Iterator, Integer, ascii::space_type>{
-    qi::rule<Iterator, Body, ascii::space_type> body;
-    qi::rule<Iterator, Binding, ascii::space_type> definition;
-    qi::rule<Iterator, PTR<Expression>, ascii::space_type> expression;
-    qi::rule<Iterator, Integer, ascii::space_type> integer;
-    qi::rule<Iterator, Boolean, ascii::space_type> boolean;
-    qi::rule<Iterator, String, ascii::space_type> string;
-    qi::rule<Iterator, Variable, ascii::space_type> variable;
-    qi::rule<Iterator, Conditional, ascii::space_type> conditional;
-    qi::rule<Iterator, Conjunction, ascii::space_type> conjunction;
-    qi::rule<Iterator, Disjunction, ascii::space_type> disjunction;
-    qi::rule<Iterator, Mutation, ascii::space_type> mutation;
-    qi::rule<Iterator, Lambda, ascii::space_type> lambda;
-    qi::rule<Iterator, Body, ascii::space_type> begin;
-    qi::rule<Iterator, Application, ascii::space_type> application;
+  struct grammar : qi::grammar<Iterator, Integer(), ascii::space_type>{
+    qi::rule<Iterator, Body(), ascii::space_type> body;
+    qi::rule<Iterator, Binding(), ascii::space_type> definition;
+    qi::rule<Iterator, PTR<Expression>(), ascii::space_type> expression;
+    qi::rule<Iterator, Integer(), ascii::space_type> integer;
+    qi::rule<Iterator, Boolean(), ascii::space_type> boolean;
+    qi::rule<Iterator, String(), ascii::space_type> string;
+    qi::rule<Iterator, Variable(), ascii::space_type> variable;
+    qi::rule<Iterator, Conditional(), ascii::space_type> conditional;
+    qi::rule<Iterator, Conjunction(), ascii::space_type> conjunction;
+    qi::rule<Iterator, Disjunction(), ascii::space_type> disjunction;
+    qi::rule<Iterator, Mutation(), ascii::space_type> mutation;
+    qi::rule<Iterator, Lambda(), ascii::space_type> lambda;
+    qi::rule<Iterator, Body(), ascii::space_type> begin;
+    qi::rule<Iterator, Application(), ascii::space_type> application;
 
     grammar() : grammar::base_type(integer) {
-      integer = qi::long_long[phx::at_c<0>(qi::_val) = qi::_1];
+      integer = qi::long_long[phx::bind(&Integer::value, qi::_val) = qi::_1];
     }
   };
   
@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
   
   uscheme::parser::grammar<std::string::const_iterator> g;
   uscheme::ast::Integer b;
+  b.value = -1;
   std::string::const_iterator iter = str.begin();
   std::string::const_iterator end = str.end();
   bool r = boost::spirit::qi::phrase_parse(iter, end, g,

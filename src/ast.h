@@ -66,35 +66,4 @@ namespace ast {
 
 }}
 
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Integer,
-                     (long long, value))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Boolean,
-                     (bool, value))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::String,
-                     (std::string, value))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Variable,
-                     (std::string, name))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Binding,
-                     (uscheme::ast::Variable, variable)
-                     (PTR<uscheme::ast::Expression>, expression))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Body,
-                     (std::vector<uscheme::ast::Binding>, bindings)
-                     (std::vector<PTR<uscheme::ast::Expression> >, expressions))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Conditional,
-                     (PTR<uscheme::ast::Expression>, predicate)
-                     (PTR<uscheme::ast::Expression>, consequent)
-                     (PTR<uscheme::ast::Expression>, alternate))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Conjunction,
-                     (std::vector<PTR<uscheme::ast::Expression> >, expressions))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Disjunction,
-                     (std::vector<PTR<uscheme::ast::Expression> >, expressions))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Mutation,
-                     (uscheme::ast::Binding, binding))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Lambda,
-                     (std::vector<uscheme::ast::Variable>, arguments)
-                     (uscheme::ast::Body, body))
-BOOST_FUSION_ADAPT_STRUCT(uscheme::ast::Application,
-                     (PTR<uscheme::ast::Expression>, applicator)
-                     (std::vector<PTR<uscheme::ast::Expression> >, arguments))
-
 #endif
