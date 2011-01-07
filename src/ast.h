@@ -7,8 +7,8 @@
 namespace uscheme {
 namespace ast {
 
-  struct Expression { protected: Expression() {} };
-  struct Literal : public Expression { protected: Literal() {} };
+  class Expression { public: virtual ~Expression() {} protected: Expression() {} };
+  class Literal : public Expression { protected: Literal() {} };
 
   struct Integer : public Literal {
     long long value;
