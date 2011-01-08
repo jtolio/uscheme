@@ -67,21 +67,21 @@ namespace parser {
       application = (qi::lit("(") >> expression >> *expression >> ')')[
           phx::bind(&Application::applicator, qi::_val) = qi::_1,
           phx::bind(&Application::arguments, qi::_val) = qi::_2];
-      expression = variable[boost::bind(&make_expression_Variable, ::_1, ::_2)]|
-                   integer[boost::bind(&make_expression_Integer, ::_1, ::_2)] |
-                   boolean[boost::bind(&make_expression_Boolean, ::_1, ::_2)] |
-                   string[boost::bind(&make_expression_String, ::_1, ::_2)] |
-                   conditional[boost::bind(
-                      &make_expression_Conditional, ::_1, ::_2)] |
-                   conjunction[boost::bind(
-                      &make_expression_Conjunction, ::_1, ::_2)] |
-                   disjunction[boost::bind(
-                      &make_expression_Disjunction, ::_1, ::_2)] |
-                   mutation[boost::bind(&make_expression_Mutation, ::_1, ::_2)]|
-                   lambda[boost::bind(&make_expression_Lambda, ::_1, ::_2)] |
-                   begin[boost::bind(&make_expression_Scope, ::_1, ::_2)] |
-                   application[boost::bind(&make_expression_Application, ::_1,
-                      ::_2)];
+#define EXPRESSION(rule, Struct) \
+        rule[phx::bind((void (PTR<Expression>::*)(Struct*))\
+            &PTR<Expression>::reset, qi::_val, phx::new_<Struct>(qi::_1))]
+      expression = EXPRESSION(variable, Variable) |
+                   EXPRESSION(integer, Integer) |
+                   EXPRESSION(boolean, Boolean) |
+                   EXPRESSION(string, String) |
+                   EXPRESSION(conditional, Conditional) |
+                   EXPRESSION(conjunction, Conjunction) |
+                   EXPRESSION(disjunction, Disjunction) |
+                   EXPRESSION(mutation, Mutation) |
+                   EXPRESSION(lambda, Lambda) |
+                   EXPRESSION(begin, Scope) |
+                   EXPRESSION(application, Application);
+#undef EXPRESSION
       
       body.name("body");
       definition.name("definition");
@@ -109,25 +109,6 @@ namespace parser {
 
     }
     
-    private:
-#define MAKE_EXPRESSION(exp_type) \
-      static void make_expression_##exp_type(exp_type const& x, \
-          boost::spirit::context<boost::fusion::cons<PTR<Expression>&, \
-          boost::fusion::nil>, boost::fusion::vector0<void> >& context) { \
-        boost::fusion::at_c<0>(context.attributes).reset(new exp_type(x)); \
-      }
-      MAKE_EXPRESSION(Variable)
-      MAKE_EXPRESSION(Integer)
-      MAKE_EXPRESSION(Boolean)
-      MAKE_EXPRESSION(String)    
-      MAKE_EXPRESSION(Conditional)
-      MAKE_EXPRESSION(Conjunction)
-      MAKE_EXPRESSION(Disjunction)
-      MAKE_EXPRESSION(Application)
-      MAKE_EXPRESSION(Mutation)
-      MAKE_EXPRESSION(Lambda)
-      MAKE_EXPRESSION(Scope)
-#undef MAKE_EXPRESSION
   };
 
 }}
