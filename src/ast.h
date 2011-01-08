@@ -63,6 +63,10 @@ namespace ast {
     PTR<Expression> applicator;
     std::vector<PTR<Expression> > arguments;
   };
+  
+  struct Scope : public Expression {
+    Body body;
+  };
 
 }}
 
